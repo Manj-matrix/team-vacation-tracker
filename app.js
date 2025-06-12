@@ -1,4 +1,5 @@
-const { useState } = React;
+<div className="space-y-6">
+              <div className="bg-grayconst { useState } = React;
 
 // Icon components using SVG
 const CalendarIcon = () => (
@@ -52,10 +53,13 @@ const VacationTracker = () => {
   ];
 
   const [vacations, setVacations] = useState([
-    { id: 1, employeeId: 1, weeks: [25, 26, 27], type: 'Semester (Annual Leave)', year: 2025 },
-    { id: 2, employeeId: 2, weeks: [30, 31], type: 'Semester (Annual Leave)', year: 2025 },
-    { id: 3, employeeId: 3, weeks: [15, 16, 17, 18], type: 'Föräldraledighet (Parental Leave)', year: 2025 }
+    { id: 1, employeeId: 1, weeks: [25, 26, 27], type: 'Semester (Annual Leave)', year: 2025, description: 'Summer vacation in Greece' },
+    { id: 2, employeeId: 2, weeks: [30, 31], type: 'Semester (Annual Leave)', year: 2025, description: 'Family time' },
+    { id: 3, employeeId: 3, weeks: [15, 16, 17, 18], type: 'Föräldraledighet (Parental Leave)', year: 2025, description: 'Newborn care' }
   ]);
+
+  const [selectedWeeks, setSelectedWeeks] = useState([]);
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
@@ -65,7 +69,8 @@ const VacationTracker = () => {
     employeeId: '',
     weeks: '',
     type: vacationTypes[0],
-    year: 2025
+    year: 2025,
+    description: ''
   });
   
   const [newEmployee, setNewEmployee] = useState({
@@ -85,20 +90,85 @@ const VacationTracker = () => {
   };
 
   const handleAddVacation = () => {
-    if (newVacation.employeeId && newVacation.weeks) {
-      const weeksArray = newVacation.weeks.split(',').map(w => parseInt(w.trim())).filter(w => w >= 1 && w <= 52);
-      if (weeksArray.length > 0) {
-        setVacations([...vacations, {
-          id: Date.now(),
-          employeeId: parseInt(newVacation.employeeId),
-          weeks: weeksArray,
-          type: newVacation.type,
-          year: newVacation.year
-        }]);
-        setNewVacation({ employeeId: '', weeks: '', type: vacationTypes[0], year: 2025 });
-        setShowAddForm(false);
+    const weeksToUse = selectedWeeks.length > 0 ? selectedWeeks : 
+                      (newVacation.weeks ? newVacation.weeks.split(',').map(w => parseInt(w.trim())).filter(w => w >= 1 && w <= 52) : []);
+    
+    if (newVacation.employeeId && weeksToUse.length > 0) {
+      setVacations([...vacations, {
+        id: Date.now(),
+        employeeId: parseInt(newVacation.employeeId),
+        weeks: weeksToUse,
+        type: newVacation.type,
+        year: newVacation.year,
+        description: newVacation.description || ''
+      }]);
+      setNewVacation({ employeeId: '', weeks: '', type: vacationTypes[0], year: 2025, description: '' });
+      setSelectedWeeks([]);
+      setShowAddForm(false);
+    }
+  };
+
+  const handleWeekClick = (week) => {
+    if (!isSelecting) return;
+    
+    setSelectedWeeks(prev => {
+      if (prev.includes(week)) {
+        return prev.filter(w => w !== week);
+      } else {
+        return [...prev, week].sort((a, b) => a - b);
+      }
+    });
+  };
+
+  const getWeekRange = (weeks) => {
+    if (!weeks || weeks.length === 0) return '';
+    if (weeks.length === 1) return `Week ${weeks[0]}`;
+    
+    const sorted = [...weeks].sort((a, b) => a - b);
+    const ranges = [];
+    let start = sorted[0];
+    let end = sorted[0];
+    
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] === end + 1) {
+        end = sorted[i];
+      } else {
+        ranges.push(start === end ? `${start}` : `${start}-${end}`);
+        start = end = sorted[i];
       }
     }
+    ranges.push(start === end ? `${start}` : `${start}-${end}`);
+    
+    return `Week${ranges.length > 1 ? 's' : ''} ${ranges.join(', ')}`;
+  };
+
+  const getDateRange = (weeks) => {
+    if (!weeks || weeks.length === 0) return '';
+    
+    const getDateFromWeek = (week) => {
+      const jan1 = new Date(2025, 0, 1);
+      const days = (week - 1) * 7;
+      const date = new Date(jan1.getTime() + days * 24 * 60 * 60 * 1000);
+      return date;
+    };
+    
+    const sorted = [...weeks].sort((a, b) => a - b);
+    const startDate = getDateFromWeek(sorted[0]);
+    const endDate = getDateFromWeek(sorted[sorted.length - 1] + 1);
+    endDate.setDate(endDate.getDate() - 1); // End of week
+    
+    const formatDate = (date) => {
+      return date.toLocaleDateString('sv-SE', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    };
+    
+    if (sorted.length === 1) {
+      return formatDate(startDate);
+    }
+    
+    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   };
 
   const handleAddEmployee = () => {
@@ -170,241 +240,302 @@ const VacationTracker = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <CalendarIcon />
-            <h1 className="text-3xl font-bold text-gray-900">Team Vacation Tracker</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <PlusIcon />
-              Add Vacation
-            </button>
-            <button
-              onClick={() => setShowEmployeeForm(!showEmployeeForm)}
-              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <UsersIcon />
-              {editingEmployee ? 'Edit Employee' : 'Add Employee'}
-            </button>
-          </div>
-        </div>
-
-        {showEmployeeForm && (
-          <div className="bg-gray-50 p-4 rounded-lg mb-6">
-            <h3 className="text-lg font-semibold mb-4">
-              {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={newEmployee.name}
-                onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    <div className="min-h-screen bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <img 
+                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMTAwIDQwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjgiIGN5PSIxNiIgcj0iOCIgZmlsbD0iIzAwMCIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMTYiIHI9IjYiIGZpbGw9IiMwMDAiLz48dGV4dCB4PSI0MCIgeT0iMjQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMwMDAiPlZveWFkbzwvdGV4dD48L3N2Zz4="
+                alt="Voyado" 
+                className="h-10"
               />
-              <input
-                type="text"
-                placeholder="Job Title/Role"
-                value={newEmployee.role}
-                onChange={(e) => setNewEmployee({...newEmployee, role: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <input
-                type="text"
-                placeholder="Manager Name"
-                value={newEmployee.manager}
-                onChange={(e) => setNewEmployee({...newEmployee, manager: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={editingEmployee ? handleUpdateEmployee : handleAddEmployee}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex-1"
-                >
-                  {editingEmployee ? 'Update' : 'Add'}
-                </button>
-                {editingEmployee && (
-                  <button
-                    onClick={() => {
-                      setEditingEmployee(null);
-                      setNewEmployee({ name: '', role: '', manager: '' });
-                      setShowEmployeeForm(false);
-                    }}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                )}
+              <div>
+                <h1 className="text-3xl font-bold text-white">Team Vacation Tracker</h1>
+                <p className="text-gray-400 text-sm mt-1">Manage team availability and time off</p>
               </div>
             </div>
-          </div>
-        )}
-
-        {showAddForm && (
-          <div className="bg-gray-50 p-4 rounded-lg mb-6">
-            <h3 className="text-lg font-semibold mb-4">Add New Vacation</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <select
-                value={newVacation.employeeId}
-                onChange={(e) => setNewVacation({...newVacation, employeeId: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select Employee</option>
-                {employees.map(emp => (
-                  <option key={emp.id} value={emp.id}>{emp.name}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Week numbers (e.g., 25,26,27)"
-                value={newVacation.weeks}
-                onChange={(e) => setNewVacation({...newVacation, weeks: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <select
-                value={newVacation.type}
-                onChange={(e) => setNewVacation({...newVacation, type: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {vacationTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
+            <div className="flex items-center gap-2">
               <button
-                onClick={handleAddVacation}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                onClick={() => {
+                  setIsSelecting(!isSelecting);
+                  setSelectedWeeks([]);
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  isSelecting 
+                    ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
               >
-                Add
+                📅 {isSelecting ? 'Stop Selecting' : 'Select Dates'}
+              </button>
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <PlusIcon />
+                Add Vacation
+              </button>
+              <button
+                onClick={() => setShowEmployeeForm(!showEmployeeForm)}
+                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <UsersIcon />
+                {editingEmployee ? 'Edit Employee' : 'Add Employee'}
               </button>
             </div>
           </div>
-        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">Vacation Calendar - 2025</h2>
-                <p className="text-sm text-gray-600 mt-1">Current week: {currentWeek}</p>
+          {isSelecting && selectedWeeks.length > 0 && (
+            <div className="bg-yellow-900 border border-yellow-700 p-4 rounded-lg mb-6">
+              <p className="text-yellow-100">
+                Selected weeks: {selectedWeeks.join(', ')} ({getDateRange(selectedWeeks)})
+                <button 
+                  onClick={() => setSelectedWeeks([])}
+                  className="ml-4 text-yellow-300 hover:text-yellow-100"
+                >
+                  Clear selection
+                </button>
+              </p>
+            </div>
+          )}
+
+          {showEmployeeForm && (
+            <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg mb-6">
+              <h3 className="text-lg font-semibold mb-4 text-white">
+                {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={newEmployee.name}
+                  onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  placeholder="Job Title/Role"
+                  value={newEmployee.role}
+                  onChange={(e) => setNewEmployee({...newEmployee, role: e.target.value})}
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  placeholder="Manager Name"
+                  value={newEmployee.manager}
+                  onChange={(e) => setNewEmployee({...newEmployee, manager: e.target.value})}
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={editingEmployee ? handleUpdateEmployee : handleAddEmployee}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex-1"
+                  >
+                    {editingEmployee ? 'Update' : 'Add'}
+                  </button>
+                  {editingEmployee && (
+                    <button
+                      onClick={() => {
+                        setEditingEmployee(null);
+                        setNewEmployee({ name: '', role: '', manager: '' });
+                        setShowEmployeeForm(false);
+                      }}
+                      className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </div>
-              
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 min-w-[200px]">
-                        Employee
-                      </th>
-                      {getWeeksArray().map(week => (
-                        <th key={week} className={`px-2 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] ${
-                          week === currentWeek ? 'bg-yellow-100 text-yellow-800' : 'text-gray-500'
-                        }`}>
-                          {week}
+            </div>
+          )}
+
+          {showAddForm && (
+            <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg mb-6">
+              <h3 className="text-lg font-semibold mb-4 text-white">Add New Vacation</h3>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <select
+                  value={newVacation.employeeId}
+                  onChange={(e) => setNewVacation({...newVacation, employeeId: e.target.value})}
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select Employee</option>
+                  {employees.map(emp => (
+                    <option key={emp.id} value={emp.id}>{emp.name}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="Week numbers (e.g., 25,26,27)"
+                  value={selectedWeeks.length > 0 ? selectedWeeks.join(',') : newVacation.weeks}
+                  onChange={(e) => setNewVacation({...newVacation, weeks: e.target.value})}
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={selectedWeeks.length > 0}
+                />
+                <select
+                  value={newVacation.type}
+                  onChange={(e) => setNewVacation({...newVacation, type: e.target.value})}
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {vacationTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="Description (optional)"
+                  value={newVacation.description}
+                  onChange={(e) => setNewVacation({...newVacation, description: e.target.value})}
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button
+                  onClick={handleAddVacation}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-gray-700 px-6 py-4 border-b border-gray-600">
+                  <h2 className="text-xl font-semibold text-white">Vacation Calendar - 2025</h2>
+                  <p className="text-gray-300 text-sm mt-1">Current week: {currentWeek}</p>
+                  {isSelecting && (
+                    <p className="text-yellow-300 text-sm mt-1">🖱️ Click on week numbers to select dates</p>
+                  )}
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead className="bg-gray-700">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sticky left-0 bg-gray-700 z-10 min-w-[200px]">
+                          Employee
                         </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {employees.map(employee => (
-                      <tr key={employee.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 sticky left-0 bg-white z-10 border-r border-gray-200">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="text-sm font-medium text-gray-900">{employee.name}</div>
-                              <div className="text-xs text-gray-500">{employee.role} • Manager: {employee.manager}</div>
-                            </div>
-                            <div className="flex gap-1 ml-2">
-                              <button
-                                onClick={() => handleEditEmployee(employee)}
-                                className="text-blue-600 hover:text-blue-800 p-1"
-                                title="Edit employee"
-                              >
-                                <EditIcon />
-                              </button>
-                              <button
-                                onClick={() => handleRemoveEmployee(employee.id)}
-                                className="text-red-600 hover:text-red-800 p-1"
-                                title="Remove employee"
-                              >
-                                <TrashIcon />
-                              </button>
-                            </div>
-                          </div>
-                        </td>
                         {getWeeksArray().map(week => (
-                          <td key={week} className={`px-1 py-3 text-center ${
-                            week === currentWeek ? 'bg-yellow-50' : ''
-                          }`}>
-                            {isWeekOff(employee.id, week) && (
-                              <div className={`w-6 h-6 rounded-full mx-auto ${
-                                getTypeColor(getVacationTypeForWeek(employee.id, week)).replace('text-', 'bg-').replace('-800', '-500')
-                              }`} title={getVacationTypeForWeek(employee.id, week)}>
-                              </div>
-                            )}
-                          </td>
+                          <th 
+                            key={week} 
+                            className={`px-2 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] cursor-pointer transition-colors ${
+                              week === currentWeek ? 'bg-yellow-600 text-white' : 
+                              selectedWeeks.includes(week) ? 'bg-blue-600 text-white' :
+                              isSelecting ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-400'
+                            }`}
+                            onClick={() => handleWeekClick(week)}
+                          >
+                            {week}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-gray-800 divide-y divide-gray-700">
+                      {employees.map(employee => (
+                        <tr key={employee.id} className="hover:bg-gray-700">
+                          <td className="px-4 py-3 sticky left-0 bg-gray-800 z-10 border-r border-gray-700">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-white">{employee.name}</div>
+                                <div className="text-xs text-gray-400">{employee.role} • Manager: {employee.manager}</div>
+                              </div>
+                              <div className="flex gap-1 ml-2">
+                                <button
+                                  onClick={() => handleEditEmployee(employee)}
+                                  className="text-blue-400 hover:text-blue-300 p-1"
+                                  title="Edit employee"
+                                >
+                                  <EditIcon />
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveEmployee(employee.id)}
+                                  className="text-red-400 hover:text-red-300 p-1"
+                                  title="Remove employee"
+                                >
+                                  <TrashIcon />
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                          {getWeeksArray().map(week => (
+                            <td 
+                              key={week} 
+                              className={`px-1 py-3 text-center ${
+                                week === currentWeek ? 'bg-yellow-900' : ''
+                              }`}
+                            >
+                              {isWeekOff(employee.id, week) && (
+                                <div className={`w-6 h-6 rounded-full mx-auto ${
+                                  getTypeColor(getVacationTypeForWeek(employee.id, week)).replace('text-', 'bg-').replace('-800', '-500')
+                                }`} title={getVacationTypeForWeek(employee.id, week)}>
+                                </div>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-6">
-            <div className="bg-white border border-gray-200 rounded-lg">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <UsersIcon />
-                  Vacation Types
-                </h3>
-              </div>
-              <div className="p-4 space-y-2">
-                {vacationTypes.map(type => (
-                  <div key={type} className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full ${getTypeColor(type).replace('text-', 'bg-').replace('-800', '-500')}`}></div>
-                    <span className="text-sm text-gray-700">{type}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-lg">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Active Vacations</h3>
-              </div>
-              <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
-                {vacations.map(vacation => {
-                  const employee = employees.find(emp => emp.id === vacation.employeeId);
-                  return (
-                    <div key={vacation.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900">{employee?.name}</div>
-                        <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${getTypeColor(vacation.type)}`}>
-                          {vacation.type}
-                        </div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          Weeks: {vacation.weeks.join(', ')}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removeVacation(vacation.id)}
-                        className="text-red-600 hover:text-red-800 p-1"
-                      >
-                        <TrashIcon />
-                      </button>
+            <div className="space-y-6">
+              <div className="bg-gray-800 border border-gray-700 rounded-lg">
+                <div className="bg-gray-700 px-6 py-4 border-b border-gray-600">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <UsersIcon />
+                    Vacation Types
+                  </h3>
+                </div>
+                <div className="p-4 space-y-2">
+                  {vacationTypes.map(type => (
+                    <div key={type} className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded-full ${getTypeColor(type).replace('text-', 'bg-').replace('-800', '-500')}`}></div>
+                      <span className="text-sm text-gray-300">{type}</span>
                     </div>
-                  );
-                })}
-                {vacations.length === 0 && (
-                  <p className="text-gray-500 text-center py-4">No vacations scheduled</p>
-                )}
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-gray-800 border border-gray-700 rounded-lg">
+                <div className="bg-gray-700 px-6 py-4 border-b border-gray-600">
+                  <h3 className="text-lg font-semibold text-white">Active Vacations</h3>
+                </div>
+                <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+                  {vacations.map(vacation => {
+                    const employee = employees.find(emp => emp.id === vacation.employeeId);
+                    return (
+                      <div key={vacation.id} className="flex items-start justify-between p-3 bg-gray-700 rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium text-white">{employee?.name}</div>
+                          <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${getTypeColor(vacation.type)}`}>
+                            {vacation.type}
+                          </div>
+                          <div className="text-sm text-gray-300 mt-1">
+                            {getWeekRange(vacation.weeks)} ({getDateRange(vacation.weeks)})
+                          </div>
+                          {vacation.description && (
+                            <div className="text-sm text-gray-400 mt-1 italic">
+                              "{vacation.description}"
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => removeVacation(vacation.id)}
+                          className="text-red-400 hover:text-red-300 p-1"
+                        >
+                          <TrashIcon />
+                        </button>
+                      </div>
+                    );
+                  })}
+                  {vacations.length === 0 && (
+                    <p className="text-gray-500 text-center py-4">No vacations scheduled</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
