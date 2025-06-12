@@ -1,24 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Debug Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Sup och Ops Vacay</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sticky { position: sticky; }
+        .z-10 { z-index: 10; }
+    </style>
 </head>
 <body>
-    <h1>Test 1: Basic HTML works</h1>
-    <div id="root">Loading...</div>
-    
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <script>
-        console.log("Test 2: React loaded?", typeof React);
-        console.log("Test 3: ReactDOM loaded?", typeof ReactDOM);
-        
-        // Simple test
-        ReactDOM.render(
-            React.createElement('h2', null, 'Test 4: React works!'),
-            document.getElementById('root')
-        );
-    </script>
+    <div id="root"></div>
+    <script type="text/babel" src="app.js"></script>
 </body>
 </html>
