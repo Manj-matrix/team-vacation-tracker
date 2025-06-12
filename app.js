@@ -1,8 +1,37 @@
 const { useState } = React;
-const { Calendar, Plus, Edit2, Trash2, Users } = lucide;
+
+// Icon components using SVG
+const CalendarIcon = () => (
+  <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+  </svg>
+);
+
+const UsersIcon = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
 
 const VacationTracker = () => {
-  // Sample data with Swedish vacation types
   const [employees, setEmployees] = useState([
     { id: 1, name: 'Anna Andersson', role: 'Developer', manager: 'Lars Nilsson' },
     { id: 2, name: 'Erik Johansson', role: 'Designer', manager: 'Lars Nilsson' },
@@ -31,12 +60,14 @@ const VacationTracker = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  
   const [newVacation, setNewVacation] = useState({
     employeeId: '',
     weeks: '',
     type: vacationTypes[0],
     year: 2025
   });
+  
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     role: '',
@@ -115,10 +146,6 @@ const VacationTracker = () => {
     setVacations(vacations.filter(v => v.id !== id));
   };
 
-  const getEmployeeVacations = (employeeId) => {
-    return vacations.filter(v => v.employeeId === employeeId);
-  };
-
   const isWeekOff = (employeeId, week) => {
     return vacations.some(v => v.employeeId === employeeId && v.weeks.includes(week));
   };
@@ -142,246 +169,249 @@ const VacationTracker = () => {
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
 
-  return React.createElement('div', { className: "max-w-7xl mx-auto p-6 bg-white" },
-    React.createElement('div', { className: "mb-8" },
-      React.createElement('div', { className: "flex items-center justify-between mb-6" },
-        React.createElement('div', { className: "flex items-center gap-3" },
-          React.createElement(Calendar, { className: "h-8 w-8 text-blue-600" }),
-          React.createElement('h1', { className: "text-3xl font-bold text-gray-900" }, "Team Vacation Tracker")
-        ),
-        React.createElement('div', { className: "flex items-center gap-2" },
-          React.createElement('button', {
-            onClick: () => setShowAddForm(!showAddForm),
-            className: "flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          },
-            React.createElement(Plus, { className: "h-4 w-4" }),
-            "Add Vacation"
-          ),
-          React.createElement('button', {
-            onClick: () => setShowEmployeeForm(!showEmployeeForm),
-            className: "flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-          },
-            React.createElement(Users, { className: "h-4 w-4" }),
-            editingEmployee ? 'Edit Employee' : 'Add Employee'
-          )
-        )
-      ),
+  return (
+    <div className="max-w-7xl mx-auto p-6 bg-white">
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <CalendarIcon />
+            <h1 className="text-3xl font-bold text-gray-900">Team Vacation Tracker</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon />
+              Add Vacation
+            </button>
+            <button
+              onClick={() => setShowEmployeeForm(!showEmployeeForm)}
+              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <UsersIcon />
+              {editingEmployee ? 'Edit Employee' : 'Add Employee'}
+            </button>
+          </div>
+        </div>
 
-      showEmployeeForm && React.createElement('div', { className: "bg-gray-50 p-4 rounded-lg mb-6" },
-        React.createElement('h3', { className: "text-lg font-semibold mb-4" },
-          editingEmployee ? 'Edit Employee' : 'Add New Employee'
-        ),
-        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-4 gap-4" },
-          React.createElement('input', {
-            type: "text",
-            placeholder: "Full Name",
-            value: newEmployee.name,
-            onChange: (e) => setNewEmployee({...newEmployee, name: e.target.value}),
-            className: "px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          }),
-          React.createElement('input', {
-            type: "text",
-            placeholder: "Job Title/Role",
-            value: newEmployee.role,
-            onChange: (e) => setNewEmployee({...newEmployee, role: e.target.value}),
-            className: "px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          }),
-          React.createElement('input', {
-            type: "text",
-            placeholder: "Manager Name",
-            value: newEmployee.manager,
-            onChange: (e) => setNewEmployee({...newEmployee, manager: e.target.value}),
-            className: "px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          }),
-          React.createElement('div', { className: "flex gap-2" },
-            React.createElement('button', {
-              onClick: editingEmployee ? handleUpdateEmployee : handleAddEmployee,
-              className: "bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex-1"
-            },
-              editingEmployee ? 'Update' : 'Add'
-            ),
-            editingEmployee && React.createElement('button', {
-              onClick: () => {
-                setEditingEmployee(null);
-                setNewEmployee({ name: '', role: '', manager: '' });
-                setShowEmployeeForm(false);
-              },
-              className: "bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-            },
-              'Cancel'
-            )
-          )
-        )
-      ),
+        {showEmployeeForm && (
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h3 className="text-lg font-semibold mb-4">
+              {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={newEmployee.name}
+                onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <input
+                type="text"
+                placeholder="Job Title/Role"
+                value={newEmployee.role}
+                onChange={(e) => setNewEmployee({...newEmployee, role: e.target.value})}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <input
+                type="text"
+                placeholder="Manager Name"
+                value={newEmployee.manager}
+                onChange={(e) => setNewEmployee({...newEmployee, manager: e.target.value})}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={editingEmployee ? handleUpdateEmployee : handleAddEmployee}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex-1"
+                >
+                  {editingEmployee ? 'Update' : 'Add'}
+                </button>
+                {editingEmployee && (
+                  <button
+                    onClick={() => {
+                      setEditingEmployee(null);
+                      setNewEmployee({ name: '', role: '', manager: '' });
+                      setShowEmployeeForm(false);
+                    }}
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
-      showAddForm && React.createElement('div', { className: "bg-gray-50 p-4 rounded-lg mb-6" },
-        React.createElement('h3', { className: "text-lg font-semibold mb-4" }, "Add New Vacation"),
-        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-4 gap-4" },
-          React.createElement('select', {
-            value: newVacation.employeeId,
-            onChange: (e) => setNewVacation({...newVacation, employeeId: e.target.value}),
-            className: "px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          },
-            React.createElement('option', { value: "" }, "Select Employee"),
-            employees.map(emp => 
-              React.createElement('option', { key: emp.id, value: emp.id }, emp.name)
-            )
-          ),
-          React.createElement('input', {
-            type: "text",
-            placeholder: "Week numbers (e.g., 25,26,27)",
-            value: newVacation.weeks,
-            onChange: (e) => setNewVacation({...newVacation, weeks: e.target.value}),
-            className: "px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          }),
-          React.createElement('select', {
-            value: newVacation.type,
-            onChange: (e) => setNewVacation({...newVacation, type: e.target.value}),
-            className: "px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          },
-            vacationTypes.map(type => 
-              React.createElement('option', { key: type, value: type }, type)
-            )
-          ),
-          React.createElement('button', {
-            onClick: handleAddVacation,
-            className: "bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-          },
-            "Add"
-          )
-        )
-      ),
+        {showAddForm && (
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h3 className="text-lg font-semibold mb-4">Add New Vacation</h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <select
+                value={newVacation.employeeId}
+                onChange={(e) => setNewVacation({...newVacation, employeeId: e.target.value})}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select Employee</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.name}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                placeholder="Week numbers (e.g., 25,26,27)"
+                value={newVacation.weeks}
+                onChange={(e) => setNewVacation({...newVacation, weeks: e.target.value})}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <select
+                value={newVacation.type}
+                onChange={(e) => setNewVacation({...newVacation, type: e.target.value})}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                {vacationTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleAddVacation}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        )}
 
-      React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-3 gap-6" },
-        React.createElement('div', { className: "lg:col-span-2" },
-          React.createElement('div', { className: "bg-white border border-gray-200 rounded-lg overflow-hidden" },
-            React.createElement('div', { className: "bg-gray-50 px-6 py-4 border-b border-gray-200" },
-              React.createElement('h2', { className: "text-xl font-semibold text-gray-900" }, "Vacation Calendar - 2025"),
-              React.createElement('p', { className: "text-sm text-gray-600 mt-1" }, `Current week: ${currentWeek}`)
-            ),
-            
-            React.createElement('div', { className: "overflow-x-auto" },
-              React.createElement('table', { className: "min-w-full" },
-                React.createElement('thead', { className: "bg-gray-50" },
-                  React.createElement('tr', null,
-                    React.createElement('th', { 
-                      className: "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 min-w-[200px]"
-                    }, "Employee"),
-                    getWeeksArray().map(week => 
-                      React.createElement('th', { 
-                        key: week, 
-                        className: `px-2 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] ${
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">Vacation Calendar - 2025</h2>
+                <p className="text-sm text-gray-600 mt-1">Current week: {currentWeek}</p>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 min-w-[200px]">
+                        Employee
+                      </th>
+                      {getWeeksArray().map(week => (
+                        <th key={week} className={`px-2 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] ${
                           week === currentWeek ? 'bg-yellow-100 text-yellow-800' : 'text-gray-500'
-                        }`
-                      }, week)
-                    )
-                  )
-                ),
-                React.createElement('tbody', { className: "bg-white divide-y divide-gray-200" },
-                  employees.map(employee => 
-                    React.createElement('tr', { key: employee.id, className: "hover:bg-gray-50" },
-                      React.createElement('td', { className: "px-4 py-3 sticky left-0 bg-white z-10 border-r border-gray-200" },
-                        React.createElement('div', { className: "flex items-center justify-between" },
-                          React.createElement('div', { className: "flex-1" },
-                            React.createElement('div', { className: "text-sm font-medium text-gray-900" }, employee.name),
-                            React.createElement('div', { className: "text-xs text-gray-500" }, `${employee.role} • Manager: ${employee.manager}`)
-                          ),
-                          React.createElement('div', { className: "flex gap-1 ml-2" },
-                            React.createElement('button', {
-                              onClick: () => handleEditEmployee(employee),
-                              className: "text-blue-600 hover:text-blue-800 p-1",
-                              title: "Edit employee"
-                            },
-                              React.createElement(Edit2, { className: "h-3 w-3" })
-                            ),
-                            React.createElement('button', {
-                              onClick: () => handleRemoveEmployee(employee.id),
-                              className: "text-red-600 hover:text-red-800 p-1",
-                              title: "Remove employee"
-                            },
-                              React.createElement(Trash2, { className: "h-3 w-3" })
-                            )
-                          )
-                        )
-                      ),
-                      getWeeksArray().map(week => 
-                        React.createElement('td', { 
-                          key: week, 
-                          className: `px-1 py-3 text-center ${week === currentWeek ? 'bg-yellow-50' : ''}`
-                        },
-                          isWeekOff(employee.id, week) && React.createElement('div', {
-                            className: `w-6 h-6 rounded-full mx-auto ${
-                              getTypeColor(getVacationTypeForWeek(employee.id, week)).replace('text-', 'bg-').replace('-800', '-500')
-                            }`,
-                            title: getVacationTypeForWeek(employee.id, week)
-                          })
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        ),
+                        }`}>
+                          {week}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {employees.map(employee => (
+                      <tr key={employee.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 sticky left-0 bg-white z-10 border-r border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900">{employee.name}</div>
+                              <div className="text-xs text-gray-500">{employee.role} • Manager: {employee.manager}</div>
+                            </div>
+                            <div className="flex gap-1 ml-2">
+                              <button
+                                onClick={() => handleEditEmployee(employee)}
+                                className="text-blue-600 hover:text-blue-800 p-1"
+                                title="Edit employee"
+                              >
+                                <EditIcon />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveEmployee(employee.id)}
+                                className="text-red-600 hover:text-red-800 p-1"
+                                title="Remove employee"
+                              >
+                                <TrashIcon />
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                        {getWeeksArray().map(week => (
+                          <td key={week} className={`px-1 py-3 text-center ${
+                            week === currentWeek ? 'bg-yellow-50' : ''
+                          }`}>
+                            {isWeekOff(employee.id, week) && (
+                              <div className={`w-6 h-6 rounded-full mx-auto ${
+                                getTypeColor(getVacationTypeForWeek(employee.id, week)).replace('text-', 'bg-').replace('-800', '-500')
+                              }`} title={getVacationTypeForWeek(employee.id, week)}>
+                              </div>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
 
-        React.createElement('div', { className: "space-y-6" },
-          React.createElement('div', { className: "bg-white border border-gray-200 rounded-lg" },
-            React.createElement('div', { className: "bg-gray-50 px-6 py-4 border-b border-gray-200" },
-              React.createElement('h3', { className: "text-lg font-semibold text-gray-900 flex items-center gap-2" },
-                React.createElement(Users, { className: "h-5 w-5" }),
-                "Vacation Types"
-              )
-            ),
-            React.createElement('div', { className: "p-4 space-y-2" },
-              vacationTypes.map(type => 
-                React.createElement('div', { key: type, className: "flex items-center gap-2" },
-                  React.createElement('div', { 
-                    className: `w-4 h-4 rounded-full ${getTypeColor(type).replace('text-', 'bg-').replace('-800', '-500')}`
-                  }),
-                  React.createElement('span', { className: "text-sm text-gray-700" }, type)
-                )
-              )
-            )
-          ),
+          <div className="space-y-6">
+            <div className="bg-white border border-gray-200 rounded-lg">
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <UsersIcon />
+                  Vacation Types
+                </h3>
+              </div>
+              <div className="p-4 space-y-2">
+                {vacationTypes.map(type => (
+                  <div key={type} className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded-full ${getTypeColor(type).replace('text-', 'bg-').replace('-800', '-500')}`}></div>
+                    <span className="text-sm text-gray-700">{type}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          React.createElement('div', { className: "bg-white border border-gray-200 rounded-lg" },
-            React.createElement('div', { className: "bg-gray-50 px-6 py-4 border-b border-gray-200" },
-              React.createElement('h3', { className: "text-lg font-semibold text-gray-900" }, "Active Vacations")
-            ),
-            React.createElement('div', { className: "p-4 space-y-3 max-h-96 overflow-y-auto" },
-              vacations.map(vacation => {
-                const employee = employees.find(emp => emp.id === vacation.employeeId);
-                return React.createElement('div', { 
-                  key: vacation.id, 
-                  className: "flex items-start justify-between p-3 bg-gray-50 rounded-lg"
-                },
-                  React.createElement('div', { className: "flex-1" },
-                    React.createElement('div', { className: "font-medium text-gray-900" }, employee?.name),
-                    React.createElement('div', { 
-                      className: `inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${getTypeColor(vacation.type)}`
-                    }, vacation.type),
-                    React.createElement('div', { className: "text-sm text-gray-600 mt-1" }, 
-                      `Weeks: ${vacation.weeks.join(', ')}`
-                    )
-                  ),
-                  React.createElement('button', {
-                    onClick: () => removeVacation(vacation.id),
-                    className: "text-red-600 hover:text-red-800 p-1"
-                  },
-                    React.createElement(Trash2, { className: "h-4 w-4" })
-                  )
-                );
-              }),
-              vacations.length === 0 && React.createElement('p', { 
-                className: "text-gray-500 text-center py-4" 
-              }, "No vacations scheduled")
-            )
-          )
-        )
-      )
-    )
+            <div className="bg-white border border-gray-200 rounded-lg">
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Active Vacations</h3>
+              </div>
+              <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+                {vacations.map(vacation => {
+                  const employee = employees.find(emp => emp.id === vacation.employeeId);
+                  return (
+                    <div key={vacation.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{employee?.name}</div>
+                        <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${getTypeColor(vacation.type)}`}>
+                          {vacation.type}
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          Weeks: {vacation.weeks.join(', ')}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeVacation(vacation.id)}
+                        className="text-red-600 hover:text-red-800 p-1"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
+                  );
+                })}
+                {vacations.length === 0 && (
+                  <p className="text-gray-500 text-center py-4">No vacations scheduled</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-ReactDOM.render(React.createElement(VacationTracker), document.getElementById('root'));
+ReactDOM.render(<VacationTracker />, document.getElementById('root'));
