@@ -1,9 +1,8 @@
-<div className="space-y-6">
-              <div className="bg-grayconst { useState } = React;
+const { useState } = React;
 
 // Icon components using SVG
 const CalendarIcon = () => (
-  <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg className="h-8 w-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
   </svg>
 );
@@ -58,12 +57,11 @@ const VacationTracker = () => {
     { id: 3, employeeId: 3, weeks: [15, 16, 17, 18], type: 'Föräldraledighet (Parental Leave)', year: 2025, description: 'Newborn care' }
   ]);
 
-  const [selectedWeeks, setSelectedWeeks] = useState([]);
-  const [isSelecting, setIsSelecting] = useState(false);
-
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [selectedWeeks, setSelectedWeeks] = useState([]);
+  const [isSelecting, setIsSelecting] = useState(false);
   
   const [newVacation, setNewVacation] = useState({
     employeeId: '',
@@ -155,7 +153,7 @@ const VacationTracker = () => {
     const sorted = [...weeks].sort((a, b) => a - b);
     const startDate = getDateFromWeek(sorted[0]);
     const endDate = getDateFromWeek(sorted[sorted.length - 1] + 1);
-    endDate.setDate(endDate.getDate() - 1); // End of week
+    endDate.setDate(endDate.getDate() - 1);
     
     const formatDate = (date) => {
       return date.toLocaleDateString('sv-SE', { 
@@ -245,13 +243,9 @@ const VacationTracker = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <img 
-                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMTAwIDQwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjgiIGN5PSIxNiIgcj0iOCIgZmlsbD0iIzAwMCIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMTYiIHI9IjYiIGZpbGw9IiMwMDAiLz48dGV4dCB4PSI0MCIgeT0iMjQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMwMDAiPlZveWFkbzwvdGV4dD48L3N2Zz4="
-                alt="Voyado" 
-                className="h-10"
-              />
+              <CalendarIcon />
               <div>
-                <h1 className="text-3xl font-bold text-white">Team Vacation Tracker</h1>
+                <h1 className="text-3xl font-bold text-white">Voyado Team Vacation Tracker</h1>
                 <p className="text-gray-400 text-sm mt-1">Manage team availability and time off</p>
               </div>
             </div>
