@@ -1,20 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT Sup och Ops Vacay</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .sticky { position: sticky; }
-        .z-10 { z-index: 10; }
-    </style>
 </head>
-<body>
+<body style="background: #111827; color: white; margin: 0;">
     <div id="root"></div>
-    <script type="text/babel" src="app.js"></script>
+    <script>
+        const { useState } = React;
+        const VacationTracker = () => {
+            return React.createElement('div', { 
+                style: { padding: '20px', textAlign: 'center' }
+            }, 
+                React.createElement('h1', null, 'IT Sup och Ops Vacay'),
+                React.createElement('p', null, 'App is loading...')
+            );
+        };
+        ReactDOM.render(React.createElement(VacationTracker), document.getElementById('root'));
+    </script>
 </body>
 </html>
