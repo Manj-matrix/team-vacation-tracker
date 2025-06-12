@@ -68,7 +68,9 @@ const VacationTracker = () => {
     weeks: '',
     type: vacationTypes[0],
     year: 2025,
-    description: ''
+    description: '',
+    startDate: '',
+    endDate: ''
   });
   
   const [newEmployee, setNewEmployee] = useState({
@@ -79,6 +81,38 @@ const VacationTracker = () => {
 
   const currentWeek = Math.ceil((new Date().getTime() - new Date(2025, 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000));
 
+  // Helper function to convert dates to weeks
+  const dateToWeek = (dateStr) => {
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    const jan1 = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor((date - jan1) / (24 * 60 * 60 * 1000));
+    return Math.ceil((days + jan1.getDay() + 1) / 7);
+  };
+
+  const getWeeksFromDateRange = (startDate, endDate) => {
+    if (!startDate || !endDate) return [];
+    const startWeek = dateToWeek(startDate);
+    const endWeek = dateToWeek(endDate);
+    const weeks = [];
+    
+    for (let week = startWeek; week <= endWeek; week++) {
+      weeks.push(week);
+    }
+    return weeks;
+  };
+
+  const handleDateChange = (field, value) => {
+    const updatedVacation = { ...newVacation, [field]: value };
+    
+    if (updatedVacation.startDate && updatedVacation.endDate) {
+      const weeks = getWeeksFromDateRange(updatedVacation.startDate, updatedVacation.endDate);
+      updatedVacation.weeks = weeks.join(',');
+    }
+    
+    setNewVacation(updatedVacation);
+  };
+
   const getWeeksArray = () => {
     const weeks = [];
     for (let i = 1; i <= 52; i++) {
@@ -88,8 +122,16 @@ const VacationTracker = () => {
   };
 
   const handleAddVacation = () => {
-    const weeksToUse = selectedWeeks.length > 0 ? selectedWeeks : 
-                      (newVacation.weeks ? newVacation.weeks.split(',').map(w => parseInt(w.trim())).filter(w => w >= 1 && w <= 52) : []);
+    let weeksToUse = [];
+    
+    // Priority: 1. Selected weeks from calendar, 2. Date range, 3. Manual input
+    if (selectedWeeks.length > 0) {
+      weeksToUse = selectedWeeks;
+    } else if (newVacation.startDate && newVacation.endDate) {
+      weeksToUse = getWeeksFromDateRange(newVacation.startDate, newVacation.endDate);
+    } else if (newVacation.weeks) {
+      weeksToUse = newVacation.weeks.split(',').map(w => parseInt(w.trim())).filter(w => w >= 1 && w <= 52);
+    }
     
     if (newVacation.employeeId && weeksToUse.length > 0) {
       setVacations([...vacations, {
@@ -100,7 +142,7 @@ const VacationTracker = () => {
         year: newVacation.year,
         description: newVacation.description || ''
       }]);
-      setNewVacation({ employeeId: '', weeks: '', type: vacationTypes[0], year: 2025, description: '' });
+      setNewVacation({ employeeId: '', weeks: '', type: vacationTypes[0], year: 2025, description: '', startDate: '', endDate: '' });
       setSelectedWeeks([]);
       setShowAddForm(false);
     }
@@ -245,7 +287,7 @@ const VacationTracker = () => {
             <div className="flex items-center gap-4">
               <CalendarIcon />
               <div>
-                <h1 className="text-3xl font-bold text-white">Voyado Team Vacation Tracker</h1>
+                <h1 className="text-3xl font-bold text-white">IT Sup och Ops Vacay</h1>
                 <p className="text-gray-400 text-sm mt-1">Manage team availability and time off</p>
               </div>
             </div>
@@ -348,47 +390,96 @@ const VacationTracker = () => {
           {showAddForm && (
             <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg mb-6">
               <h3 className="text-lg font-semibold mb-4 text-white">Add New Vacation</h3>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <select
-                  value={newVacation.employeeId}
-                  onChange={(e) => setNewVacation({...newVacation, employeeId: e.target.value})}
-                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select Employee</option>
-                  {employees.map(emp => (
-                    <option key={emp.id} value={emp.id}>{emp.name}</option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  placeholder="Week numbers (e.g., 25,26,27)"
-                  value={selectedWeeks.length > 0 ? selectedWeeks.join(',') : newVacation.weeks}
-                  onChange={(e) => setNewVacation({...newVacation, weeks: e.target.value})}
-                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={selectedWeeks.length > 0}
-                />
-                <select
-                  value={newVacation.type}
-                  onChange={(e) => setNewVacation({...newVacation, type: e.target.value})}
-                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {vacationTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  placeholder="Description (optional)"
-                  value={newVacation.description}
-                  onChange={(e) => setNewVacation({...newVacation, description: e.target.value})}
-                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <button
-                  onClick={handleAddVacation}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Add
-                </button>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <select
+                    value={newVacation.employeeId}
+                    onChange={(e) => setNewVacation({...newVacation, employeeId: e.target.value})}
+                    className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Employee</option>
+                    {employees.map(emp => (
+                      <option key={emp.id} value={emp.id}>{emp.name}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={newVacation.type}
+                    onChange={(e) => setNewVacation({...newVacation, type: e.target.value})}
+                    className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {vacationTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Select Dates</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Start Date</label>
+                      <input
+                        type="date"
+                        value={newVacation.startDate}
+                        onChange={(e) => handleDateChange('startDate', e.target.value)}
+                        min="2025-01-01"
+                        max="2025-12-31"
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">End Date</label>
+                      <input
+                        type="date"
+                        value={newVacation.endDate}
+                        onChange={(e) => handleDateChange('endDate', e.target.value)}
+                        min={newVacation.startDate || "2025-01-01"}
+                        max="2025-12-31"
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Or enter week numbers manually</label>
+                  <input
+                    type="text"
+                    placeholder="Week numbers (e.g., 25,26,27)"
+                    value={selectedWeeks.length > 0 ? selectedWeeks.join(',') : 
+                           (newVacation.startDate && newVacation.endDate) ? newVacation.weeks : newVacation.weeks}
+                    onChange={(e) => setNewVacation({...newVacation, weeks: e.target.value, startDate: '', endDate: ''})}
+                    disabled={selectedWeeks.length > 0 || (newVacation.startDate && newVacation.endDate)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="md:col-span-3">
+                    <input
+                      type="text"
+                      placeholder="Description (optional)"
+                      value={newVacation.description}
+                      onChange={(e) => setNewVacation({...newVacation, description: e.target.value})}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddVacation}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Add Vacation
+                  </button>
+                </div>
+                
+                {(newVacation.startDate && newVacation.endDate) && (
+                  <div className="bg-blue-900 border border-blue-700 p-3 rounded-lg">
+                    <p className="text-blue-100 text-sm">
+                      📅 Selected: {new Date(newVacation.startDate).toLocaleDateString('sv-SE')} - {new Date(newVacation.endDate).toLocaleDateString('sv-SE')} 
+                      (Weeks: {getWeeksFromDateRange(newVacation.startDate, newVacation.endDate).join(', ')})
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
