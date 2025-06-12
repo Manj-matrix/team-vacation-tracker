@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT Sup och Ops Vacay</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .sticky { position: sticky; }
@@ -14,25 +15,6 @@
 </head>
 <body>
     <div id="root"></div>
-    <script>
-        // Put your app.js content directly here for now
-        console.log("Loading vacation tracker...");
-        
-        // Simple test first
-        const App = () => {
-            return React.createElement('div', {
-                className: 'min-h-screen bg-gray-900 text-white p-6'
-            },
-                React.createElement('h1', {
-                    className: 'text-3xl font-bold mb-4'
-                }, 'IT Sup och Ops Vacay'),
-                React.createElement('p', {
-                    className: 'text-gray-400'
-                }, 'Vacation tracker is working! Now we can add the full functionality.')
-            );
-        };
-        
-        ReactDOM.render(React.createElement(App), document.getElementById('root'));
-    </script>
+    <script type="text/babel" src="app.js"></script>
 </body>
 </html>
