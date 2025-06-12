@@ -23,4 +23,16 @@
             return React.createElement('div', {
                 className: 'min-h-screen bg-gray-900 text-white p-6'
             },
-                React.createElement
+                React.createElement('h1', {
+                    className: 'text-3xl font-bold mb-4'
+                }, 'IT Sup och Ops Vacay'),
+                React.createElement('p', {
+                    className: 'text-gray-400'
+                }, 'Vacation tracker is working! Now we can add the full functionality.')
+            );
+        };
+        
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+</html>
